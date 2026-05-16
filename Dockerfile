@@ -10,11 +10,14 @@ RUN apk add --no-cache \
     git \
     unzip \
     libpng-dev \
+    freetype-dev \
+    libjpeg-turbo-dev \
     libzip-dev \
     sqlite-dev \
     bash
 
-RUN docker-php-ext-install \
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
     pdo_mysql \
     pdo_sqlite \
     intl \
@@ -44,9 +47,9 @@ COPY docker/default.conf /etc/nginx/http.d/default.conf
 
 # Script de inicialização
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh && sed -i 's/\r$//' /usr/local/bin/entrypoint.sh
 
-# Expor a porta que o Render vai usar (geralmente 10000 ou 80)
+# Expor a porta que o Render vai usar
 EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
