@@ -32,6 +32,12 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Configurar diretório de trabalho
 WORKDIR /var/www/html
 
+# Configurar o Nginx e Entrypoint primeiro (ajuda no cache e evita erros de contexto)
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY docker/default.conf /etc/nginx/http.d/default.conf
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh && sed -i 's/\r$//' /usr/local/bin/entrypoint.sh
+
 # Copiar os arquivos do projeto
 COPY . .
 
@@ -40,14 +46,6 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Ajustar permissões para o Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Configurar o Nginx
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-COPY docker/default.conf /etc/nginx/http.d/default.conf
-
-# Script de inicialização
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh && sed -i 's/\r$//' /usr/local/bin/entrypoint.sh
 
 # Expor a porta que o Render vai usar
 EXPOSE 80

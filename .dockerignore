@@ -7,4 +7,3 @@
 .phpunit.result.cache
 Dockerfile
 .dockerignore
-# docker/  <-- Removido para permitir o build
